@@ -4,25 +4,26 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
+/*Serializable = padrao do JAVA para o objeto possa ser convertido em bytes... */
 public class Category implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    private Long Id;
+    private Long id;
     private String name;
 
     public Category() {
     }
     public Category(Long id, String name) {
-        Id = id;
+        this.id = id;
         this.name = name;
     }
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        id = id;
     }
 
     public String getName() {
@@ -38,6 +39,7 @@ public class Category implements Serializable {
         return Objects.hash(getId());
     }
 
+    /*equals compara um objeto e retorna true or false*/
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
