@@ -4,7 +4,8 @@ import com.devsuperior.dscatalog.DTOs.CategoryRequestDto;
 import com.devsuperior.dscatalog.DTOs.CategoryResponseDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
-import com.devsuperior.dscatalog.services.exceptions.EntityNotFoundExcepetion;
+import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundExcepetion;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponseDTO findById(Long id) {
         Optional<Category> entityCategoryOpt = categoryRepository.findById(id);
-        entityCategoryOpt.orElseThrow(()-> new EntityNotFoundExcepetion("Categoria não encontrada")); /*Estanciando uma execeção para tratar erros*/
+        entityCategoryOpt.orElseThrow(()-> new ResourceNotFoundExcepetion("Categoria não encontrada")); /*Estanciando uma execeção para tratar erros*/
         return new CategoryResponseDTO(entityCategoryOpt.get());
     }
 
@@ -42,5 +43,18 @@ public class CategoryService {
         Category response = categoryRepository.save(categoryEntity);
         CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO(response);
         return categoryResponseDTO;
+    }
+
+    @Transactional // é uma forma de garantir a atomicidade, consistência, isolamento e durabilidade (ACID) das operações em um banco de dados.
+    public CategoryResponseDTO updateCategory(Long id, CategoryRequestDto categoryRequestDto) {
+//        OBS: getReferenceById= é criado uma estância em memória do objeto sem "bater" no banco de dados, somente quando salvar é que de fato a applicação chama o banco de dados
+        try {
+            Category entity = categoryRepository.getReferenceById(id);
+            entity.setName(categoryRequestDto.getName());
+            entity = categoryRepository.save(entity);
+            return new CategoryResponseDTO(entity);
+        } catch (EntityNotFoundException ex) {
+            throw new ResourceNotFoundExcepetion("Id não existe " + id);
+        }
     }
 }
