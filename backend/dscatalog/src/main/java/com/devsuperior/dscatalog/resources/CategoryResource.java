@@ -1,5 +1,6 @@
 package com.devsuperior.dscatalog.resources;
 
+import com.devsuperior.dscatalog.DTOs.CategoryRequestDto;
 import com.devsuperior.dscatalog.DTOs.CategoryResponseDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.services.CategoryService;
@@ -7,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,4 +33,15 @@ public class CategoryResource {
         CategoryResponseDTO catDto = categoryService.findById(id);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(catDto);
     }
+
+    @PostMapping
+    public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody CategoryRequestDto categoryRequestDto){
+        CategoryResponseDTO categoryResponseDTO = categoryService.createCategory(categoryRequestDto);
+
+//        Inserindo location com patch
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(categoryResponseDTO.getId()).toUri();
+        return ResponseEntity.created(uri).body(categoryResponseDTO);
+    }
+
 }

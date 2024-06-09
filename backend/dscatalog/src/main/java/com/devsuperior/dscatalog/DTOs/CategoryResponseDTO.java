@@ -12,9 +12,6 @@ public class CategoryResponseDTO implements Serializable {
     private Long Id;
     private String name;
 
-    public CategoryResponseDTO() {
-    }
-
     public CategoryResponseDTO(Category category) {
         this.Id = category.getId();
         this.name = category.getName();

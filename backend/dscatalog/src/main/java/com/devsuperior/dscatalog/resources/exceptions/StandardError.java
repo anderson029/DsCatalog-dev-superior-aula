@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import java.time.Instant;
 
 /*
-Classe que sera usada para padronozar as exceções
+Classe que sera usada para padronizar as exceções
 * */
 public class StandardError {
 
