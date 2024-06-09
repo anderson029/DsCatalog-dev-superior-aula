@@ -4,9 +4,12 @@ import com.devsuperior.dscatalog.DTOs.CategoryRequestDto;
 import com.devsuperior.dscatalog.DTOs.CategoryResponseDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
+import com.devsuperior.dscatalog.services.exceptions.DataBaseExcepetion;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundExcepetion;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +34,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponseDTO findById(Long id) {
         Optional<Category> entityCategoryOpt = categoryRepository.findById(id);
-        entityCategoryOpt.orElseThrow(()-> new ResourceNotFoundExcepetion("Categoria não encontrada")); /*Estanciando uma execeção para tratar erros*/
+        entityCategoryOpt.orElseThrow(()-> new ResourceNotFoundExcepetion("Category not found")); /*Estanciando uma execeção para tratar erros*/
         return new CategoryResponseDTO(entityCategoryOpt.get());
     }
 
@@ -54,7 +57,19 @@ public class CategoryService {
             entity = categoryRepository.save(entity);
             return new CategoryResponseDTO(entity);
         } catch (EntityNotFoundException ex) {
-            throw new ResourceNotFoundExcepetion("Id não existe " + id);
+            throw new ResourceNotFoundExcepetion("Id not found: " + id);
+        }
+    }
+
+    public void deleteCategory(Long id) {
+        try {
+            categoryRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new ResourceNotFoundExcepetion("Id not found: " + id);
+        }
+        catch (DataIntegrityViolationException e){
+            throw new DataBaseExcepetion("Integrity violation");
+
         }
     }
 }

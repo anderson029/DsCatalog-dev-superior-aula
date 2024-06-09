@@ -48,7 +48,12 @@ public class CategoryResource {
     public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable Long id, @RequestBody CategoryRequestDto categoryRequestDto){
         CategoryResponseDTO categoryResponseDTO = categoryService.updateCategory(id, categoryRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(categoryResponseDTO);
+    }
 
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id){
+        categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
