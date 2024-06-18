@@ -1,7 +1,5 @@
 package com.devsuperior.dscatalog.resources.exceptions;
 
-import org.springframework.http.HttpStatus;
-
 import java.time.Instant;
 
 /*
@@ -10,7 +8,7 @@ Classe que sera usada para padronizar as exceções
 public class StandardError {
 
     private Instant timestamp;
-    private HttpStatus status;
+    private Integer status;
     private String error;
     private String message;
     private String patch;
@@ -26,11 +24,11 @@ public class StandardError {
         this.timestamp = timestamp;
     }
 
-    public HttpStatus getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(HttpStatus status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

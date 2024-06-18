@@ -5,11 +5,10 @@ import com.devsuperior.dscatalog.DTOs.CategoryResponseDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.services.exceptions.DataBaseExcepetion;
-import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundExcepetion;
+import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,18 +33,17 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponseDTO findById(Long id) {
         Optional<Category> entityCategoryOpt = categoryRepository.findById(id);
-        entityCategoryOpt.orElseThrow(()-> new ResourceNotFoundExcepetion("Category not found")); /*Estanciando uma execeção para tratar erros*/
+        entityCategoryOpt.orElseThrow(()-> new ResourceNotFoundException("Category not found")); /*Estanciando uma execeção para tratar erros*/
         return new CategoryResponseDTO(entityCategoryOpt.get());
     }
 
     @Transactional(readOnly = true)
     public CategoryResponseDTO createCategory(CategoryRequestDto categoryRequestDto) {
 //        Category categoryEntity = new Category(null, categoryRequestDto.getName());
-        Category categoryEntity = ((Supplier<Category>) () -> new Category(null, categoryRequestDto.getName())).get();
+        var categoryEntity = ((Supplier<Category>) () -> new Category(null, categoryRequestDto.getName())).get();
 
         Category response = categoryRepository.save(categoryEntity);
-        CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO(response);
-        return categoryResponseDTO;
+        return new CategoryResponseDTO(response);
     }
 
     @Transactional // é uma forma de garantir a atomicidade, consistência, isolamento e durabilidade (ACID) das operações em um banco de dados.
@@ -57,19 +55,16 @@ public class CategoryService {
             entity = categoryRepository.save(entity);
             return new CategoryResponseDTO(entity);
         } catch (EntityNotFoundException ex) {
-            throw new ResourceNotFoundExcepetion("Id not found: " + id);
+            throw new ResourceNotFoundException("Id not found: " + id);
         }
     }
 
-    public void deleteCategory(Long id) {
+    public void deleteCategory (Long id){
         try {
-            categoryRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException ex) {
-            throw new ResourceNotFoundExcepetion("Id not found: " + id);
-        }
-        catch (DataIntegrityViolationException e){
+            Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id not found: " + id));
+            categoryRepository.delete(category);
+        } catch (DataIntegrityViolationException e) {
             throw new DataBaseExcepetion("Integrity violation");
-
         }
     }
 }
