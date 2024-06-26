@@ -21,7 +21,7 @@ public class ProductRequestDto implements Serializable {
 
     private Instant date;
 
-    private List<CategoryRequestDto> categories = new ArrayList<>();
+    private List<CategoryResponseDTO> categories = new ArrayList<>();
 
     public ProductRequestDto() {
     }
@@ -44,7 +44,7 @@ public class ProductRequestDto implements Serializable {
 
     public ProductRequestDto(Product entity, Set<Category> categories) {
        this(entity); // chama o construtor que contenha essa entidade como parâmetro
-        categories.forEach(cat -> this.categories.add(new CategoryRequestDto(cat)));
+        categories.forEach(cat -> this.categories.add(new CategoryResponseDTO(cat)));
     }
 
     public String getName() {
@@ -87,11 +87,11 @@ public class ProductRequestDto implements Serializable {
         this.date = date;
     }
 
-    public List<CategoryRequestDto> getCategories() {
+    public List<CategoryResponseDTO> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<CategoryRequestDto> categories) {
+    public void setCategories(List<CategoryResponseDTO> categories) {
         this.categories = categories;
     }
 }

@@ -1,8 +1,12 @@
 package com.devsuperior.dscatalog.services;
 
+import com.devsuperior.dscatalog.DTOs.CategoryRequestDto;
+import com.devsuperior.dscatalog.DTOs.CategoryResponseDTO;
 import com.devsuperior.dscatalog.DTOs.ProductRequestDto;
 import com.devsuperior.dscatalog.DTOs.ProductResponseDTO;
+import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DataBaseExcepetion;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
@@ -23,6 +27,9 @@ public class ProductService {
     @Autowired
     private ProductRepository ProductRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     @Transactional(readOnly = true)
     public Page<ProductResponseDTO> findAllPaged(PageRequest pageRequest){
         Page<Product> ProductList = ProductRepository.findAll(pageRequest);
@@ -39,11 +46,10 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDTO createProduct(ProductRequestDto ProductRequestDto) {
-//        Product ProductEntity = new Product(null, ProductRequestDto.getName());
-        var ProductEntity = ((Supplier<Product>) () -> new Product(null, ProductRequestDto.getName())).get();
-
-        Product response = ProductRepository.save(ProductEntity);
-        return new ProductResponseDTO(response);
+        Product newEntity = new Product();
+        copyDtoToEntity(ProductRequestDto, newEntity);
+        Product entity = ProductRepository.save(newEntity);
+        return new ProductResponseDTO(entity, entity.getCategories());
     }
 
     @Transactional // é uma forma de garantir a atomicidade, consistência, isolamento e durabilidade (ACID) das operações em um banco de dados.
@@ -51,9 +57,9 @@ public class ProductService {
 //        OBS: getReferenceById= é criado uma estância em memória do objeto sem "bater" no banco de dados, somente quando salvar é que de fato a applicação chama o banco de dados
         try {
             Product entity = ProductRepository.getReferenceById(id);
-            entity.setName(ProductRequestDto.getName());
+            copyDtoToEntity(ProductRequestDto, entity);
             entity = ProductRepository.save(entity);
-            return new ProductResponseDTO(entity);
+            return new ProductResponseDTO(entity, entity.getCategories());
         } catch (EntityNotFoundException ex) {
             throw new ResourceNotFoundException("Id not found: " + id);
         }
@@ -65,6 +71,22 @@ public class ProductService {
             ProductRepository.delete(Product);
         } catch (DataIntegrityViolationException e) {
             throw new DataBaseExcepetion("Integrity violation");
+        }
+    }
+
+    private void copyDtoToEntity(ProductRequestDto dto, Product entity){
+        entity.setName(dto.getName());
+        entity.setDescription(dto.getDescription());
+        entity.setImgUrl(dto.getImgUrl());
+        entity.setPrice(dto.getPrice());
+        entity.setDate(dto.getDate());
+
+        entity.getCategories().clear(); //Garantir que a lista de categorias esteja vazia.
+
+        for (CategoryResponseDTO catDto : dto.getCategories()){
+            Optional<Category> category = categoryRepository.findById(catDto.getId()); //poderia usar o getone porém não funciona
+            Category categoryEntity = category.get();
+            entity.getCategories().add(categoryEntity);
         }
     }
 }

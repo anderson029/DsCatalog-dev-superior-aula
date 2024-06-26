@@ -5,6 +5,9 @@ import com.devsuperior.dscatalog.entities.Category;
 public class CategoryRequestDto {
     private String name;
 
+    public CategoryRequestDto() {
+    }
+
     public CategoryRequestDto(Category category) {
         this.name = category.getName();
     }

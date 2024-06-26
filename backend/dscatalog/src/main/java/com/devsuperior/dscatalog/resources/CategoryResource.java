@@ -43,7 +43,7 @@ public class CategoryResource {
     public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody CategoryRequestDto categoryRequestDto){
         CategoryResponseDTO categoryResponseDTO = categoryService.createCategory(categoryRequestDto);
 
-//        Inserindo location com patch
+//      Inserindo location com patch
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(categoryResponseDTO.getId()).toUri();
         return ResponseEntity.created(uri).body(categoryResponseDTO);
