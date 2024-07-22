@@ -31,7 +31,7 @@ public class Product implements Serializable {
     @ManyToMany
     @JoinTable( name = "tb_product_category",
             joinColumns = @JoinColumn(name = "product_id"), // pega o id da própria classe(product_id)
-            inverseJoinColumns = @JoinColumn(name = "category_id")) // referencia a classe que esta 'setado' ex: (Cateogry)
+            inverseJoinColumns = @JoinColumn(name = "category_id")) // referencia a classe que esta 'setado' ex: (Category)
     Set<Category> categories = new HashSet<>(); //    Set é uma interface que não permite repetições. Por ser uma interface, precisamos instanciar uma classe que a implemente para utilizá-la.
 
     public Product() {
