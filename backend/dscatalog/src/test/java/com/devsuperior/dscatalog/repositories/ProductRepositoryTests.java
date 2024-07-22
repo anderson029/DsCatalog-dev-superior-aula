@@ -3,6 +3,7 @@ package com.devsuperior.dscatalog.repositories;
 import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -13,11 +14,18 @@ import java.util.Optional;
 public class ProductRepositoryTests {
     @Autowired
     private ProductRepository repository;
+
+    private long exintingId;
+    private long idNotExist;
+
+    @BeforeEach
+    public void seteup(){
+        exintingId = 1L;
+        idNotExist = 123456L;
+
+    }
     @Test
     public void deleteShouldDeleteObjectWhenIdExist(){
-
-        Long exintingId = 1L;
-
         repository.deleteById(exintingId);
 
         Optional<Product> result = repository.findById(exintingId);
@@ -26,7 +34,6 @@ public class ProductRepositoryTests {
 
     @Test
     public void deleteShouldThrowEmptyResultDataAccessExceptionWhenIdDoesNotExtst(){
-        Long idNotExist = 123456L;
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
             repository.deleteById(idNotExist);
