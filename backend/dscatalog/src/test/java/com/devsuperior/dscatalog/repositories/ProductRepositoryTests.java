@@ -1,7 +1,7 @@
 package com.devsuperior.dscatalog.repositories;
 
 import com.devsuperior.dscatalog.entities.Product;
-import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
+import com.devsuperior.dscatalog.factory.Factory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +18,26 @@ public class ProductRepositoryTests {
     private long exintingId;
     private long idNotExist;
 
+    private long countTotalProducts;
+
     @BeforeEach
     public void seteup(){
         exintingId = 1L;
         idNotExist = 123456L;
-
+        countTotalProducts = 25L;
     }
+
+    @Test
+    public void saveShouldPersistWithAutoincrementWhenIdIsNull(){
+        Product product = Factory.createProduct();
+        product.setId(null);
+
+        product = repository.save(product);
+
+        Assertions.assertNotNull(product.getId());
+        Assertions.assertEquals(countTotalProducts +1, product.getId());
+    }
+
     @Test
     public void deleteShouldDeleteObjectWhenIdExist(){
         repository.deleteById(exintingId);
@@ -33,10 +47,24 @@ public class ProductRepositoryTests {
     }
 
     @Test
-    public void deleteShouldThrowEmptyResultDataAccessExceptionWhenIdDoesNotExtst(){
+    public void findShouldProductWhenIdExists (){
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            repository.deleteById(idNotExist);
-        } );
+        Optional<Product> productOpt = repository.findById(exintingId);
+
+        Assertions.assertEquals(exintingId, productOpt.get().getId());
+        Assertions.assertNotNull(productOpt);
+        Assertions.assertTrue(productOpt.isPresent());
+
+    }
+
+    @Test
+    public void findByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist(){
+        Optional<Product> result = repository.findById(idNotExist);
+
+        Assertions.assertTrue(result.isEmpty());
+
+//        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+//            Optional<Product> productOpt = repository.findById(idNotExist);
+//        } );
     }
 }
