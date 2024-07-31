@@ -2,6 +2,7 @@ package com.devsuperior.dscatalog.services;
 
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
+import com.devsuperior.dscatalog.services.exceptions.DataBaseExcepetion;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -45,5 +47,18 @@ public class ProductServiceTests {
     });
 
     Mockito.verify(productRepository, Mockito.times(1)).deleteById(idNotExist);
+  }
+
+  @Test
+  void deleteProductShouldThrowDataBaseExcepetionWhenDependencyId(){
+    Long dependencyId = 4L;
+
+    Mockito.doThrow(DataIntegrityViolationException.class).when(productRepository).deleteById(dependencyId);
+
+    Assertions.assertThrows(DataBaseExcepetion.class,() ->{
+      productService.deleteProduct(dependencyId);
+    });
+
+    Mockito.verify(productRepository, Mockito.times(1)).deleteById(dependencyId);
   }
 }
