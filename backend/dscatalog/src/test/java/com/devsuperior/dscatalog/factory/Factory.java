@@ -1,6 +1,7 @@
 package com.devsuperior.dscatalog.factory;
 
 import com.devsuperior.dscatalog.DTOs.ProductRequestDto;
+import com.devsuperior.dscatalog.DTOs.ProductResponseDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
 
@@ -19,4 +20,8 @@ public class Factory {
        return new ProductRequestDto(product, product.getCategories());
     }
 
+    public static ProductResponseDTO createProductResponseDTO(){
+      Product product = createProduct();
+      return new ProductResponseDTO(product, product.getCategories());
+    }
 }
