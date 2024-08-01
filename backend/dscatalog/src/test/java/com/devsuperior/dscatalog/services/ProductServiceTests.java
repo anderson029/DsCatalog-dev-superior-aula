@@ -11,6 +11,7 @@ import com.devsuperior.dscatalog.services.exceptions.DataBaseExcepetion;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,10 +24,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -41,6 +40,14 @@ public class ProductServiceTests {
   private CategoryRepository categoryRepository;
 
   private Product product;
+
+  private ProductRequestDto productRequestDto;
+
+  @BeforeEach
+  public void setup() {
+    product = Factory.createProduct();
+    productRequestDto = Factory.createProductDTO();
+  }
 
 
   @Test
@@ -83,7 +90,6 @@ public class ProductServiceTests {
 
   @Test
   void findAllPagedShouldReturnPagedProducts(){
-     product = Factory.createProduct();
      PageImpl<Product> page = new PageImpl<>(List.of(product));
      when(productRepository.findAll((Pageable) any())).thenReturn(page);
 
@@ -98,14 +104,14 @@ public class ProductServiceTests {
 
   @Test
   void findByIdShouldReturnProductResponseDTOWhenIdExists(){
-    Long idExists = 1L;
-    product = Factory.createProduct();
-    Mockito.when(productRepository.findById(idExists)).thenReturn(Optional.of(product));
+    Long idExist = 1L;
 
-    ProductResponseDTO result = productService.findById(idExists);
+    Mockito.when(productRepository.findById(idExist)).thenReturn(Optional.of(product));
 
-    verify(productRepository, times(1)).findById(idExists);
-    Assertions.assertNotNull(productRepository.findById(idExists));
+    ProductResponseDTO result = productService.findById(idExist);
+
+    verify(productRepository, times(1)).findById(idExist);
+    Assertions.assertNotNull(productRepository.findById(idExist));
     Assertions.assertEquals(1L, result.getId());
     Assertions.assertEquals("Phone", result.getName());
     Assertions.assertNotNull(result);
@@ -113,45 +119,32 @@ public class ProductServiceTests {
 
   @Test
   void findByIdShouldThrowsResourceNotFoundExceptionWhenIdNotExists(){
-    Long idNotExistis = 123L;
+    Long idNotExist = 123L;
 
     Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-      productService.findById(idNotExistis);
+      productService.findById(idNotExist);
     });
   }
 
   @Test
   void updateProductShouldReturnProductUpdatedWhenIDexists(){
-    product = Factory.createProduct();
-
-    Set<Category> categories = new HashSet<>();
-    categories.add(new Category(1L, "Electronics"));
-
-    ProductRequestDto productRequestDto = new ProductRequestDto(product, categories);
-
-
     when(productRepository.getReferenceById(anyLong())).thenReturn(product);
-    when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(new Category(2L,"Eletronics")));
+    when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(new Category(3L,"Eletronics")));
     when(productRepository.save(any())).thenReturn(product);
-
 
     ProductResponseDTO result = productService.updateProduct(product.getId(), productRequestDto);
 
     verify(productRepository, times(1)).getReferenceById(product.getId());
-    verify(categoryRepository).findById(product.getId());
+    verify(categoryRepository).findById(2L);
     verify(productRepository).save(product);
 
     Assertions.assertEquals(1L, result.getId());
-    Assertions.assertEquals(2L, result.getCategories().get(0).getId());
+    Assertions.assertEquals(3L, result.getCategories().get(0).getId());
     Assertions.assertEquals("Phone", result.getName());
   }
 
   @Test
   void updateProductShouldTrowsEntityNotFoundExceptionWhenIdNotExists(){
-    product = Factory.createProduct();
-    Set<Category> categories = new HashSet<>();
-    categories.add(new Category(1L, "Electronics"));
-    ProductRequestDto productRequestDto = new ProductRequestDto(product, categories);
 
     Mockito.doThrow(EntityNotFoundException.class).when(productRepository).getReferenceById(123L);
 
