@@ -122,7 +122,6 @@ public class ProductServiceTests {
 
   @Test
   void updateProductShouldReturnProductUpdatedWhenIDexists(){
-//    Long idExists = 1L;
     product = Factory.createProduct();
 
     Set<Category> categories = new HashSet<>();
