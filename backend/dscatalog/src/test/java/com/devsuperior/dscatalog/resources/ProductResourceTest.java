@@ -1,9 +1,11 @@
 package com.devsuperior.dscatalog.resources;
 
+import com.devsuperior.dscatalog.DTOs.ProductRequestDto;
 import com.devsuperior.dscatalog.DTOs.ProductResponseDTO;
 import com.devsuperior.dscatalog.factory.Factory;
 import com.devsuperior.dscatalog.services.ProductService;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +19,10 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,23 +32,30 @@ public class ProductResourceTest {
   private MockMvc mockMvc;
 
   @MockBean
-  private ProductService ProductService;
+  private ProductService productService;
 
-  private ProductResponseDTO productDto;
+  private ProductResponseDTO productResponseDTO;
+
+  @Autowired
+  private ObjectMapper objectMapper;
+
+  private ProductRequestDto productRequestDTO;
 
   private PageImpl<ProductResponseDTO> page;
 
   @BeforeEach
   public void setup(){
-    productDto = Factory.createProductResponseDTO();
+    productRequestDTO = Factory.createProductDTO();
+    productResponseDTO = Factory.createProductResponseDTO();
+
   }
 
   @Test
   void findAllShouldRetunrPageProductResponseDTO() throws Exception {
 
-    page = new PageImpl<>(List.of(productDto)); // PageImpl permiti instaciar uma lista pagínas por isso não utilizamo o Pageable.
+    page = new PageImpl<>(List.of(productResponseDTO)); // PageImpl permiti instaciar uma lista pagínas por isso não utilizamo o Pageable.
 
-    when(ProductService.findAllPaged(any())).thenReturn(page);
+    when(productService.findAllPaged(any())).thenReturn(page);
 
      ResultActions result = mockMvc.perform((RequestBuilder)get("/products")
              .accept(MediaType.APPLICATION_JSON));
@@ -56,7 +66,7 @@ public class ProductResourceTest {
   @Test
   void findByIdShouldReturnProductResponseDTOWhenIdExists() throws Exception{
     Long idExists = 1L;
-    when(ProductService.findById(any())).thenReturn(productDto);
+    when(productService.findById(any())).thenReturn(productResponseDTO);
 
     ResultActions result = mockMvc.perform(get("/products/{id}", idExists).accept(MediaType.APPLICATION_JSON));
 
@@ -74,11 +84,47 @@ public class ProductResourceTest {
   @Test
   void findByIdShouldReturnNotFoundWhenIdNotExists() throws Exception {
     Long idNotExists = 2L;
-
-    when(ProductService.findById(any())).thenThrow(ResourceNotFoundException.class);
+    when(productService.findById(any())).thenThrow(ResourceNotFoundException.class);
 
     ResultActions result = mockMvc.perform(get("/products/{id}", idNotExists).accept(MediaType.APPLICATION_JSON));
 
     result.andExpect(status().isNotFound());
+  }
+
+  @Test
+  void updateProductShouldReturnProductResponseDTOWhenIdExists() throws Exception{
+    Long idExists = 1L;
+    String jsonBody = objectMapper.writeValueAsString(productResponseDTO);
+
+    when(productService.updateProduct(eq(idExists), any())).thenReturn(productResponseDTO); // podemos usa o <eq> para não ter incompatibilidade entre Matchers e Argumentos Reais
+//    when(productService.updateProduct(anyLong(), any())).thenReturn(productResponseDTO);
+
+    ResultActions result = mockMvc.perform(put("/products/{id}", idExists)
+            .content(jsonBody)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON));
+
+    result.andExpect(status().isOk());
+    result.andExpect(jsonPath("$.id").exists());
+    result.andExpect(jsonPath("$.name").value("Phone"));
+    result.andExpect(jsonPath("$.categories[0].name").value("Eletrônicos"));
+  }
+
+  @Test
+  void updateProductShouldThrowsResourceNotFoundExceptionWhenIdNotExists() throws Exception{
+    Long idNotExists = 2L;
+
+    String jsonBody = objectMapper.writeValueAsString(productResponseDTO);
+
+    when(productService.updateProduct(anyLong(), any())).thenThrow(ResourceNotFoundException.class);
+
+    ResultActions result = mockMvc.perform(put("/products/{id}",idNotExists)
+            .content(jsonBody)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON));
+
+    result.andExpect(status().isNotFound());
+    result.andExpect(jsonPath("$.status").value("404"));
+    result.andExpect(jsonPath("$.error").value("Resource not found"));
   }
 }
