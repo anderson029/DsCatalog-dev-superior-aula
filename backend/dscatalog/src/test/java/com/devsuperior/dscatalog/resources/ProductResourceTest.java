@@ -4,6 +4,7 @@ import com.devsuperior.dscatalog.DTOs.ProductRequestDto;
 import com.devsuperior.dscatalog.DTOs.ProductResponseDTO;
 import com.devsuperior.dscatalog.factory.Factory;
 import com.devsuperior.dscatalog.services.ProductService;
+import com.devsuperior.dscatalog.services.exceptions.DataBaseExcepetion;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,9 +21,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -127,4 +127,54 @@ public class ProductResourceTest {
     result.andExpect(jsonPath("$.status").value("404"));
     result.andExpect(jsonPath("$.error").value("Resource not found"));
   }
+
+  @Test
+  void deleteProductShouldReturnNoContentWhenIdExists() throws Exception {
+    Long idExists = 2L;
+
+    doNothing().when(productService).deleteProduct(idExists);
+
+    ResultActions result = mockMvc.perform(delete("/products/{id}", idExists));
+
+    result.andExpect(status().isNoContent());
+  }
+
+  @Test
+  void deleteProductShouldThrowsResourceNotFoundExceptionWhenIdNotExists() throws Exception {
+    Long idNotExists = 2L;
+
+    doThrow(ResourceNotFoundException.class).when(productService).deleteProduct(idNotExists);
+
+    ResultActions result = mockMvc.perform(delete("/products/{id}",idNotExists));
+
+    result.andExpect(status().isNotFound());
+  }
+
+  @Test
+  void deleteProductShouldThrowsDataIntegrityViolationException() throws Exception {
+    Long idViolation = 3L;
+
+    doThrow(DataBaseExcepetion.class).when(productService).deleteProduct(idViolation);
+
+    ResultActions result = mockMvc.perform(delete("/products/{id}",idViolation));
+
+    result.andExpect(status().isBadRequest());
+    result.andExpect(jsonPath("$.error").value("Database exception"));
+  }
+
+  @Test
+  void createProductShouldReturnProductResponseDTOWhenSendRequestDTO() throws Exception{
+
+   String json =  objectMapper.writeValueAsString(productRequestDTO);
+
+    when(productService.createProduct(any())).thenReturn(productResponseDTO);
+
+    ResultActions result = mockMvc.perform(post("/products")
+            .accept(MediaType.APPLICATION_JSON)
+            .content(json).contentType(MediaType.APPLICATION_JSON));
+
+    result.andExpect(status().isCreated());
+  }
 }
+
+
