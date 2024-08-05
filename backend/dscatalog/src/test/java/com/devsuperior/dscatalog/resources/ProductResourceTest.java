@@ -176,5 +176,3 @@ public class ProductResourceTest {
     result.andExpect(status().isCreated());
   }
 }
-
-
