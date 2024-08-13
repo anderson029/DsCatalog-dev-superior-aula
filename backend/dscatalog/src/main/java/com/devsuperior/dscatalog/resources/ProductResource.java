@@ -33,8 +33,8 @@ public class ProductResource {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductRequestDto ProductRequestDto){
-        ProductResponseDTO ProductResponseDTO = ProductService.createProduct(ProductRequestDto);
+    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductRequestDto productRequestDto){
+        ProductResponseDTO ProductResponseDTO = ProductService.createProduct(productRequestDto);
 
 //        Inserindo location com patch
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -43,8 +43,8 @@ public class ProductResource {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDto ProductRequestDto){
-        ProductResponseDTO ProductResponseDTO = ProductService.updateProduct(id, ProductRequestDto);
+    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDto productRequestDto){
+        ProductResponseDTO ProductResponseDTO = ProductService.updateProduct(id, productRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ProductResponseDTO);
     }
 

@@ -3,6 +3,7 @@ package com.devsuperior.dscatalog.services;
 import com.devsuperior.dscatalog.DTOs.RoleDTO;
 import com.devsuperior.dscatalog.DTOs.UserDTO;
 import com.devsuperior.dscatalog.DTOs.UserRequestDTO;
+import com.devsuperior.dscatalog.DTOs.UserResponseDTO;
 import com.devsuperior.dscatalog.entities.Role;
 import com.devsuperior.dscatalog.entities.User;
 import com.devsuperior.dscatalog.repositories.RoleRepository;
@@ -40,30 +41,30 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserDTO findById(Long id) {
+    public UserResponseDTO findById(Long id) {
         Optional<User> entityUserOpt = userRepository.findById(id);
         User entity = entityUserOpt.orElseThrow(()-> new ResourceNotFoundException("User not found")); /*Estanciando uma execeção para tratar erros*/
-        return new UserDTO(entity);
+        return new UserResponseDTO(entity);
     }
 
     @Transactional(readOnly = true)
-    public UserDTO createUser(UserRequestDTO userDTO) {
+    public UserResponseDTO createUser(UserRequestDTO userDTO) {
         User newEntity = new User();
         copyDtoToEntity(userDTO, newEntity);
         newEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
         User entity = userRepository.save(newEntity);
-        return new UserDTO(entity);
+        return new UserResponseDTO(entity);
     }
 
     @Transactional // é uma forma de garantir a atomicidade, consistência, isolamento e durabilidade (ACID) das operações em um banco de dados.
-    public UserDTO updateUser(Long id, UserRequestDTO userDTO) {
+    public UserResponseDTO updateUser(Long id, UserRequestDTO userDTO) {
 //        OBS: getReferenceById= é criado uma estância em memória do objeto sem "bater" no banco de dados, somente quando salvar é que de fato a applicação chama o banco de dados
         try {
             User entity = userRepository.getReferenceById(id);
             copyDtoToEntity(userDTO, entity);
             entity = userRepository.save(entity);
-            return new UserDTO(entity);
+            return new UserResponseDTO(entity);
         } catch (EntityNotFoundException ex) {
             throw new ResourceNotFoundException("Id not found: " + id);
         }
@@ -86,7 +87,7 @@ public class UserService {
         entity.getRoles().clear();
 
         for (RoleDTO roleDto : dto.getRole()){
-            Optional<Role> role = roleRepository.findById(dto.getId()); //poderia usar o getone porém não funciona
+            Optional<Role> role = roleRepository.findById(roleDto.getId()); //poderia usar o getone porém não funciona
             Role roleEntity = role.get();
             entity.getRoles().add(roleEntity);
         }

@@ -1,16 +1,13 @@
 package com.devsuperior.dscatalog.DTOs;
 
 import com.devsuperior.dscatalog.entities.User;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class UserDTO implements Serializable {
+public class UserResponseDTO implements Serializable {
 
   @Serial
   private static final long serialVersionUID = 1L;
@@ -22,23 +19,22 @@ public class UserDTO implements Serializable {
 
   private Set<RoleDTO> role = new HashSet<>();
 
-  public UserDTO() {
+  public UserResponseDTO() {
   }
 
-  public UserDTO(Long id, String firstName, String lastName, String email) {
+  public UserResponseDTO(Long id, String firstName, String lastName, String email) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
   }
 
-  public UserDTO(User entity) {
+  public UserResponseDTO(User entity) {
     id = entity.getId();
     firstName = entity.getFirstName();
     lastName = entity.getLastName();
     email = entity.getEmail();
     entity.getRoles().forEach(role -> this.role.add(new RoleDTO(role)));
-    System.out.println();
   }
 
   public Long getId() {
