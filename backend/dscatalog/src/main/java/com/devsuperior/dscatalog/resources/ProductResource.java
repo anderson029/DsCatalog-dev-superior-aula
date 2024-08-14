@@ -3,6 +3,7 @@ package com.devsuperior.dscatalog.resources;
 import com.devsuperior.dscatalog.DTOs.ProductRequestDto;
 import com.devsuperior.dscatalog.DTOs.ProductResponseDTO;
 import com.devsuperior.dscatalog.services.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +34,7 @@ public class ProductResource {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductRequestDto productRequestDto){
+    public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDto productRequestDto){
         ProductResponseDTO ProductResponseDTO = ProductService.createProduct(productRequestDto);
 
 //        Inserindo location com patch
@@ -43,7 +44,7 @@ public class ProductResource {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDto productRequestDto){
+    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequestDto productRequestDto){
         ProductResponseDTO ProductResponseDTO = ProductService.updateProduct(id, productRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ProductResponseDTO);
     }

@@ -4,6 +4,7 @@ import com.devsuperior.dscatalog.DTOs.UserDTO;
 import com.devsuperior.dscatalog.DTOs.UserRequestDTO;
 import com.devsuperior.dscatalog.DTOs.UserResponseDTO;
 import com.devsuperior.dscatalog.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,13 +26,13 @@ public class UserResource {
   }
 
   @PostMapping
-  public ResponseEntity<UserResponseDTO> createUser (@RequestBody UserRequestDTO userRequestDTO) {
+  public ResponseEntity<UserResponseDTO> createUser (@Valid @RequestBody UserRequestDTO userRequestDTO) {
     UserResponseDTO userDTO = userService.createUser(userRequestDTO);
     return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
   }
 
   @PutMapping(value = "/{id}")
-  public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userRequestDTO ){
+  public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDTO userRequestDTO ){
 
     UserResponseDTO userUpdated = userService.updateUser(id,userRequestDTO);
 
@@ -42,7 +43,6 @@ public class UserResource {
     UserResponseDTO user = userService.findById(id);
     return ResponseEntity.status(HttpStatus.OK).body(user);
   }
-
   @DeleteMapping(value = "/{id}")
   public void deleteUser(@PathVariable Long id){
     userService.deleteUser(id);

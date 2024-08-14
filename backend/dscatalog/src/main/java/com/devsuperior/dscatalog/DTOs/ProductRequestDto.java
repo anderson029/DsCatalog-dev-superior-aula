@@ -2,6 +2,10 @@ package com.devsuperior.dscatalog.DTOs;
 
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,11 +18,16 @@ public class ProductRequestDto implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Size(min = 5, max = 60, message = "Deve ter no minímo 5 a 60 caracteres")
+    @NotBlank(message = "Campo requerido")
     private String name;
+
+    @NotBlank(message = "Campo requerido")
     private String description;
+    @Positive(message = "O Valor tem que ser positivo")
     private Double price;
     private String imgUrl;
-
+    @PastOrPresent(message = "A data do produto não pode ser futura")
     private Instant date;
 
     private List<CategoryResponseDTO> categories = new ArrayList<>();

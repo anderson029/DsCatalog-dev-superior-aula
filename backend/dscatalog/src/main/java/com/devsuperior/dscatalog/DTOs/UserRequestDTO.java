@@ -1,5 +1,8 @@
 package com.devsuperior.dscatalog.DTOs;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -10,8 +13,11 @@ public class UserRequestDTO implements Serializable {
   @Serial
   private static final long serialVersionUID = 1L;
 
+  @NotBlank(message = "O Nome é obrigatório")
   private String firstName;
   private String lastName;
+
+  @Email(message = "O e-mail tem que ser válido")
   private String email;
 
   private String password;
