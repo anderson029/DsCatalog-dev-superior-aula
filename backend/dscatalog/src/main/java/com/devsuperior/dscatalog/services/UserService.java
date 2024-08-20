@@ -2,8 +2,8 @@ package com.devsuperior.dscatalog.services;
 
 import com.devsuperior.dscatalog.DTOs.RoleDTO;
 import com.devsuperior.dscatalog.DTOs.UserDTO;
-import com.devsuperior.dscatalog.DTOs.UserRequestDTO;
-import com.devsuperior.dscatalog.DTOs.UserResponseDTO;
+import com.devsuperior.dscatalog.DTOs.UserInsertDTO;
+import com.devsuperior.dscatalog.DTOs.UserUpdateDTO;
 import com.devsuperior.dscatalog.entities.Role;
 import com.devsuperior.dscatalog.entities.User;
 import com.devsuperior.dscatalog.repositories.RoleRepository;
@@ -41,30 +41,29 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDTO findById(Long id) {
+    public UserDTO findById(Long id) {
         Optional<User> entityUserOpt = userRepository.findById(id);
         User entity = entityUserOpt.orElseThrow(()-> new ResourceNotFoundException("User not found")); /*Estanciando uma execeção para tratar erros*/
-        return new UserResponseDTO(entity);
+        return new UserDTO(entity);
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDTO createUser(UserRequestDTO userDTO) {
+    public UserDTO createUser(UserInsertDTO userDTO) {
         User newEntity = new User();
         copyDtoToEntity(userDTO, newEntity);
         newEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-
         User entity = userRepository.save(newEntity);
-        return new UserResponseDTO(entity);
+        return new UserDTO(entity);
     }
 
     @Transactional // é uma forma de garantir a atomicidade, consistência, isolamento e durabilidade (ACID) das operações em um banco de dados.
-    public UserResponseDTO updateUser(Long id, UserRequestDTO userDTO) {
+    public UserDTO updateUser(Long id, UserUpdateDTO userDTO) {
 //        OBS: getReferenceById= é criado uma estância em memória do objeto sem "bater" no banco de dados, somente quando salvar é que de fato a applicação chama o banco de dados
         try {
             User entity = userRepository.getReferenceById(id);
             copyDtoToEntity(userDTO, entity);
             entity = userRepository.save(entity);
-            return new UserResponseDTO(entity);
+            return new UserDTO(entity);
         } catch (EntityNotFoundException ex) {
             throw new ResourceNotFoundException("Id not found: " + id);
         }
@@ -79,11 +78,10 @@ public class UserService {
         }
     }
 
-    private void copyDtoToEntity(UserRequestDTO dto, User entity){
+    private void copyDtoToEntity(UserDTO dto, User entity){
         entity.setFirstName(dto.getFirstName());
         entity.setLastName(dto.getLastName());
         entity.setEmail(dto.getEmail());
-        entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         entity.getRoles().clear();
 
         for (RoleDTO roleDto : dto.getRole()){
